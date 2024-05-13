@@ -12,8 +12,6 @@ import concurrent.futures
 import json
 
 
-"""Ingresa entre las comillas los codigos client_secret y client ID obtenidos desde la página de ProjectPlace"""
-
 client_id = r''
 client_secret = r''
 redirect_uri = 'https://service.projectplace.com/'
@@ -98,7 +96,6 @@ if __name__ == "__main__":
             #print(f"Status: {Card_Events.status_code}, Text: {Card_Events.text}")
             if Card_Events.status_code == 200:
                 Card_Events = Card_Events.json()
-                #print_json(json.dumps(Card_Events) )
                 #print(f"Card_Events len: {len(Card_Events)}")
                 # Print to screen every event on the card 
                 for Card_Event in Card_Events ["data"]:
@@ -114,13 +111,14 @@ if __name__ == "__main__":
                             }
                         )
                     if (Card_Event['action'] == 'change_title_action') :
+                        print_json(json.dumps(Card_Event) )
                         list.append(
                             {
                             'cardID':cardID,
                             'card_event':Card_Event['action_verbose'],
                             'card_action':Card_Event['action'],
                             'user_name':Card_Event['user_verbose'],
-                            'progress':'No aplica',
+                            'progress':Card_Event['action_new_title'],
                             'ts': Card_Event['ts']
                             }
                         )
@@ -149,7 +147,7 @@ if __name__ == "__main__":
                 querySheet.cell(column=2,row=2+i).value = action['card_event']
                 querySheet.cell(column=3,row=2+i).value = action['card_action']
                 querySheet.cell(column=4,row=2+i).value = action['user_name']
-                querySheet.cell(column=5,row=2+i).value = action['progress']
+                querySheet.cell(column=5,row=2+i).value = action['progress/action_new_title']
                 querySheet.cell(column=6,row=2+i).value = str(datetime.fromtimestamp(action['ts']))
                 i+=1
         print(f"Acciones obtenidas: {i}")
@@ -162,33 +160,6 @@ if __name__ == "__main__":
         
 
 
-        totalList = list(generator)
-        print(f"Total list size: {len(totalList)}")
-        for array in totalList:
-            print(f"Size of array: {len(array)}")
-        exit()
-        for x in range(2,maxRows-1) :
-            totalList.extend( getData(x) )
-        print('totalList size:',len(totalList))    
-        queryWorkbook = openpyxl.Workbook()
-        querySheet = queryWorkbook.active
-        querySheet.cell(column=1,row=1).value = 'Card ID'
-        querySheet.cell(column=2,row=1).value = 'Tipo de evento'
-        querySheet.cell(column=3,row=1).value = 'Nombre del evento'
-        querySheet.cell(column=4,row=1).value = 'Nombre de usuario'
-        querySheet.cell(column=5,row=1).value = 'Progreso'
-        querySheet.cell(column=5,row=1).value = 'TimeStamp'
-        for i, item in enumerate(totalList) :
-            querySheet.cell(column=1,row=2+i).value = item['cardID']
-            querySheet.cell(column=2,row=2+i).value = item['card_event']
-            querySheet.cell(column=3,row=2+i).value = item['card_action']
-            querySheet.cell(column=4,row=2+i).value = item['user_name']
-            querySheet.cell(column=5,row=2+i).value = item['progress']
-            querySheet.cell(column=5,row=2+i).value = str(datetime.fromtimestamp(item['ts']))
-        newSavePath = splitext(path)
-        queryWorkbook.save(newSavePath[0]+" - queryCardActions"+newSavePath[1])
-        stop = perf_counter()
-        print("tiempo:",stop - start)
     except KeyboardInterrupt:
         print("Programa terminado por Usuario (Keyboard Interruption)")
         exit()
